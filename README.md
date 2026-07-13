@@ -2,8 +2,8 @@
 
 A production-ready university capstone application for discovering and managing MU Online events. AvroraMU combines public event discovery with authenticated player registrations, comments, profile management, administrator workflows, secure file uploads, and PostgreSQL Row-Level Security.
 
-> **Live demo:** `https://YOUR-DEPLOYMENT.vercel.app`  
-> **GitHub repository:** `https://github.com/YOUR-USERNAME/avroramu-event-manager`
+> **Live demo:** [https://avrora-event-manager.netlify.app](https://avrora-event-manager.netlify.app)  
+> **GitHub repository:** [https://github.com/ggmammoth/avrora-event-manager](https://github.com/ggmammoth/avrora-event-manager)
 
 ## Main features
 
@@ -17,7 +17,7 @@ A production-ready university capstone application for discovering and managing 
 - Role-aware navigation, protected pages, and an admin-only dashboard
 - Event/category CRUD, event uploads, registration statuses, users, and statistics
 - Database constraints, triggers, and complete RLS policies
-- Vite multi-page production build and Vercel configuration
+- Vite multi-page production build and Netlify continuous deployment
 - Clear configuration warnings when Supabase variables are absent
 
 ## Technology stack
@@ -29,7 +29,7 @@ A production-ready university capstone application for discovering and managing 
 | Tooling | Node.js, npm, Vite |
 | Backend | Supabase PostgreSQL, Auth, Storage, REST API |
 | Security | JWT authentication, RLS, constraints, triggers |
-| Deployment | Vercel static Vite deployment |
+| Deployment | Netlify static deployment with GitHub CI/CD |
 
 No React, Vue, Angular, TypeScript, custom Node server, or frontend service-role key is used.
 
@@ -60,7 +60,8 @@ No React, Vue, Angular, TypeScript, custom Node server, or frontend service-role
 │   └── utils/                # Guards, constants, validation, formatting
 ├── supabase/                 # Ordered database and security scripts
 ├── vite.config.js            # Multi-page Rollup inputs
-└── vercel.json               # Vercel deployment settings
+├── netlify.toml              # Netlify build and publish settings
+└── vercel.json               # Optional alternative deployment settings
 ```
 
 Page controllers handle DOM interaction. Reusable services own Supabase operations, while shared components render navigation, cards, alerts, loading, and empty states. User-provided names, comments, and registration details are assigned through `textContent`, not unsafe HTML interpolation.
@@ -163,12 +164,12 @@ npm run build     # Optimized multi-page build in dist/
 npm run preview   # Preview the production build
 ```
 
-## Vercel deployment
+## Netlify deployment
 
-1. Push the repository to GitHub and import it in Vercel.
-2. Use build command `npm run build` and output directory `dist`.
-3. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel settings.
-4. Deploy, then add the Vercel origin to Supabase Auth redirect URLs.
+1. Push changes to the repository's `main` branch.
+2. Netlify automatically builds with `npm run build` and publishes `dist` using `netlify.toml`.
+3. Keep `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` configured in Netlify environment variables.
+4. Add the Netlify origin to Supabase Auth Site URL and redirect URLs.
 5. Verify direct access to every `.html` page, login, uploads, and downloads.
 
 The Vite configuration includes every HTML file as an entry point. No server rewrite or Node API is required.
@@ -203,7 +204,7 @@ Add screenshots before final submission:
 
 ## Author
 
-`YOUR NAME` — university capstone project.
+Georgi Gospodinov — university capstone project.
 
 ## License
 
