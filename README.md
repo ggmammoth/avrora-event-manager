@@ -5,6 +5,16 @@ A production-ready university capstone application for discovering and managing 
 > **Live demo:** [https://avrora-event-manager.netlify.app](https://avrora-event-manager.netlify.app)  
 > **GitHub repository:** [https://github.com/ggmammoth/avrora-event-manager](https://github.com/ggmammoth/avrora-event-manager)
 
+## Project information
+
+| Field | Value |
+| --- | --- |
+| Author | Georgi Gospodinov |
+| Email | `nereajl3n@gmail.com` |
+| GitHub repository | [ggmammoth/avrora-event-manager](https://github.com/ggmammoth/avrora-event-manager) |
+| Live project URL | [avrora-event-manager.netlify.app](https://avrora-event-manager.netlify.app) |
+| Sample credentials | `demo.user@avroramu.test` / `AvroraDemo2026!` |
+
 ## Main features
 
 - Responsive dark-fantasy interface built with Bootstrap 5 and custom CSS
@@ -76,6 +86,63 @@ The data model has six related public tables:
 - `registrations` joins a player and event; `(event_id, user_id)` is unique.
 - `comments` belongs to an event and a player.
 - `comment_reactions` belongs to a comment and player, allowing one like, love, or dislike reaction per player and comment.
+
+### Entity relationship diagram
+
+```mermaid
+erDiagram
+    AUTH_USERS ||--|| PROFILES : "owns"
+    PROFILES ||--o{ EVENTS : "creates"
+    CATEGORIES ||--o{ EVENTS : "classifies"
+    EVENTS ||--o{ REGISTRATIONS : "receives"
+    PROFILES ||--o{ REGISTRATIONS : "submits"
+    EVENTS ||--o{ COMMENTS : "contains"
+    PROFILES ||--o{ COMMENTS : "writes"
+    COMMENTS ||--o{ COMMENT_REACTIONS : "receives"
+    PROFILES ||--o{ COMMENT_REACTIONS : "adds"
+
+    AUTH_USERS {
+        uuid id PK
+        text email
+    }
+    PROFILES {
+        uuid id PK,FK
+        text full_name
+        text avatar_url
+        text role
+    }
+    CATEGORIES {
+        bigint id PK
+        text name
+    }
+    EVENTS {
+        bigint id PK
+        bigint category_id FK
+        uuid created_by FK
+        text title
+        timestamptz event_date
+        boolean is_active
+    }
+    REGISTRATIONS {
+        bigint id PK
+        bigint event_id FK
+        uuid user_id FK
+        text character_name
+        text status
+    }
+    COMMENTS {
+        bigint id PK
+        bigint event_id FK
+        uuid user_id FK
+        text content
+    }
+    COMMENT_REACTIONS {
+        bigint id PK
+        bigint comment_id FK
+        uuid user_id FK
+        text reaction_type
+    }
+```
 
 Indexes cover foreign keys, active dates, statuses, comment timelines, and trigram title search. `updated_at` triggers maintain timestamps. A registration trigger serializes entries per event and rejects inactive, started, or full events, avoiding client-side capacity races.
 
@@ -178,12 +245,13 @@ The Vite configuration includes every HTML file as an entry point. No server rew
 
 ## Sample accounts
 
-No fake auth users are inserted. Create accounts through `register.html`:
+The public demonstration account is a normal user without administrator privileges:
 
-- Admin: `YOUR_ADMIN_EMAIL` / `YOUR_ADMIN_PASSWORD` (promote with `make-admin.sql`)
-- User: `YOUR_USER_EMAIL` / `YOUR_USER_PASSWORD`
+- Email: `demo.user@avroramu.test`
+- Password: `AvroraDemo2026!`
+- Role: `user`
 
-Never commit real passwords or a populated `.env`.
+Create or reset this dedicated account through the Supabase Dashboard by following `supabase/DEMO-ACCOUNT-STEPS.md`. These credentials are intentionally public and must never be reused for a personal or administrator account. Administrator credentials remain private.
 
 ## Screenshots
 
