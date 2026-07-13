@@ -4,9 +4,10 @@ import { getSession } from '../services/auth-service.js';
 import { getProfile } from '../services/profile-service.js';
 import { getRegistrationForEvent, createRegistration } from '../services/registration-service.js';
 import { getComments, addComment, deleteComment } from '../services/comment-service.js';
+import { getReactionsForComments, removeCommentReaction, setCommentReaction } from '../services/reaction-service.js';
 import { showAlert, clearAlert } from '../components/alerts.js';
 import { showLoading, showState } from '../components/loading.js';
-import { CHARACTER_CLASSES, DEFAULT_AVATAR, DEFAULT_EVENT_IMAGE } from '../utils/constants.js';
+import { CHARACTER_CLASSES, COMMENT_REACTIONS, DEFAULT_AVATAR, DEFAULT_EVENT_IMAGE } from '../utils/constants.js';
 import { formatDate, statusBadge } from '../utils/formatters.js';
 import { validateCharacterName, setButtonLoading } from '../utils/validators.js';
 import { isSupabaseConfigured } from '../services/supabase.js';
@@ -55,14 +56,60 @@ async function loadRegistration() {
 async function loadComments() {
   const list = document.querySelector('#commentsList'); showLoading(list, 'Loading comments…');
   try {
-    const comments = await getComments(id); list.replaceChildren();
+    const comments = await getComments(id);
+    let reactions = [];
+    let reactionsAvailable = true;
+    try {
+      reactions = await getReactionsForComments(comments.map((comment) => comment.id));
+    } catch (reactionError) {
+      reactionsAvailable = false;
+      console.warn(`Comment reactions unavailable: ${reactionError.message}`);
+    }
+    list.replaceChildren();
     if (!comments.length) return showState(list, 'No comments yet', 'Be the first to start the conversation.', 'bi-chat');
+    if (!reactionsAvailable) {
+      const warning = document.createElement('div');
+      warning.className = 'alert alert-warning small';
+      warning.textContent = 'Comment reactions are temporarily unavailable.';
+      list.append(warning);
+    }
     comments.forEach((comment) => {
       const article = document.createElement('article'); article.className = 'comment p-3 mb-3'; const header = document.createElement('div'); header.className = 'd-flex align-items-center gap-2 mb-2';
-      const avatar = document.createElement('img'); avatar.className = 'avatar'; avatar.src = comment.profiles?.avatar_url || DEFAULT_AVATAR; avatar.alt = '';
+      const avatar = document.createElement('img'); avatar.className = 'avatar'; avatar.src = comment.profiles?.avatar_url || DEFAULT_AVATAR; avatar.alt = ''; avatar.addEventListener('error', () => { avatar.src = DEFAULT_AVATAR; }, { once: true });
       const meta = document.createElement('div'); const name = document.createElement('strong'); name.textContent = comment.profiles?.full_name || 'AvroraMU player'; const date = document.createElement('div'); date.className = 'small text-secondary'; date.textContent = formatDate(comment.created_at); meta.append(name, date); header.append(avatar, meta);
       if (session && (comment.user_id === session.user.id || profile?.role === 'admin')) { const remove = document.createElement('button'); remove.className = 'btn btn-sm btn-outline-danger ms-auto'; remove.type = 'button'; remove.setAttribute('aria-label', 'Delete comment'); remove.innerHTML = '<i class="bi bi-trash"></i>'; remove.addEventListener('click', async () => { if (!confirm('Delete this comment?')) return; try { await deleteComment(comment.id); await loadComments(); } catch (error) { showAlert(document.querySelector('#commentAlert'), error.message); } }); header.append(remove); }
-      const content = document.createElement('p'); content.className = 'mb-0 preserve-lines'; content.textContent = comment.content; article.append(header, content); list.append(article);
+      const content = document.createElement('p'); content.className = 'mb-2 preserve-lines'; content.textContent = comment.content;
+      const reactionBar = document.createElement('div'); reactionBar.className = 'comment-reactions d-flex flex-wrap gap-2'; reactionBar.setAttribute('aria-label', 'Comment reactions');
+      const commentReactions = reactions.filter((reaction) => reaction.comment_id === comment.id);
+      const currentReaction = session ? commentReactions.find((reaction) => reaction.user_id === session.user.id) : null;
+      COMMENT_REACTIONS.forEach((definition) => {
+        const count = commentReactions.filter((reaction) => reaction.reaction_type === definition.type).length;
+        const selected = currentReaction?.reaction_type === definition.type;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `btn btn-sm reaction-button${selected ? ' active' : ''}`;
+        button.disabled = !reactionsAvailable;
+        button.setAttribute('aria-label', `${definition.label}: ${count}`);
+        button.setAttribute('aria-pressed', String(selected));
+        const emoji = document.createElement('span'); emoji.className = 'reaction-emoji'; emoji.textContent = definition.emoji; emoji.setAttribute('aria-hidden', 'true');
+        const total = document.createElement('span'); total.className = 'reaction-count'; total.textContent = String(count);
+        button.append(emoji, total);
+        button.addEventListener('click', async () => {
+          const alertBox = document.querySelector('#commentAlert'); clearAlert(alertBox);
+          if (!session) return showAlert(alertBox, 'Please log in to react to comments.', 'warning');
+          reactionBar.querySelectorAll('button').forEach((item) => { item.disabled = true; });
+          try {
+            if (selected) await removeCommentReaction(comment.id, session.user.id);
+            else await setCommentReaction(comment.id, session.user.id, definition.type);
+            await loadComments();
+          } catch (error) {
+            showAlert(alertBox, error.message);
+            reactionBar.querySelectorAll('button').forEach((item) => { item.disabled = false; });
+          }
+        });
+        reactionBar.append(button);
+      });
+      article.append(header, content, reactionBar); list.append(article);
     });
   } catch (error) { showState(list, 'Comments could not be loaded', error.message, 'bi-exclamation-triangle'); }
 }

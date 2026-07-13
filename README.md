@@ -68,13 +68,14 @@ Page controllers handle DOM interaction. Reusable services own Supabase operatio
 
 ## Database schema and relationships
 
-The data model has five related public tables:
+The data model has six related public tables:
 
 - `profiles` has a one-to-one relationship with `auth.users`; auth deletion cascades.
 - `categories` has many `events`; deletion is restricted while in use.
 - `events` belongs to a category and may record the admin who created it.
 - `registrations` joins a player and event; `(event_id, user_id)` is unique.
 - `comments` belongs to an event and a player.
+- `comment_reactions` belongs to a comment and player, allowing one like, love, or dislike reaction per player and comment.
 
 Indexes cover foreign keys, active dates, statuses, comment timelines, and trigram title search. `updated_at` triggers maintain timestamps. A registration trigger serializes entries per event and rejects inactive, started, or full events, avoiding client-side capacity races.
 
@@ -91,6 +92,7 @@ RLS is enabled on every application table. `public.is_admin()` is a `SECURITY DE
 - Anonymous users read categories, active events, and comments.
 - Authenticated users read display profiles and update only their profile.
 - Users create comments as themselves and update/delete only their comments.
+- Everyone can read reaction totals; authenticated users create, change, or remove only their own comment reaction.
 - Users see/create only their registrations and delete only their pending entries.
 - A role-protection trigger blocks normal users from changing their own role.
 - Admins have management policies and can see inactive events and all users/registrations.

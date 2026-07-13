@@ -8,6 +8,11 @@ export const CHARACTER_CLASSES = [
 
 export const REGISTRATION_STATUSES = ['pending', 'approved', 'rejected'];
 export const USER_ROLES = ['user', 'admin'];
+export const COMMENT_REACTIONS = [
+  { type: 'like', emoji: '👍', label: 'Like' },
+  { type: 'love', emoji: '❤️', label: 'Love' },
+  { type: 'dislike', emoji: '👎', label: 'Dislike' },
+];
 export const DEFAULT_AVATAR = defaultAvatarUrl;
 export const DEFAULT_EVENT_IMAGE = defaultEventUrl;
 export const MAX_IMAGE_SIZE = 5 * 1024 * 1024;

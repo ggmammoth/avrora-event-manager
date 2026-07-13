@@ -113,6 +113,7 @@ alter table public.categories enable row level security;
 alter table public.events enable row level security;
 alter table public.registrations enable row level security;
 alter table public.comments enable row level security;
+alter table public.comment_reactions enable row level security;
 
 -- Re-running this file is safe.
 drop policy if exists "Authenticated users can read profiles" on public.profiles;
@@ -176,7 +177,22 @@ create policy "Admins can create comments" on public.comments for insert to auth
 create policy "Admins can update comments" on public.comments for update to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy "Admins can delete comments" on public.comments for delete to authenticated using (public.is_admin());
 
+drop policy if exists "Everyone can read comment reactions" on public.comment_reactions;
+drop policy if exists "Users can create own comment reactions" on public.comment_reactions;
+drop policy if exists "Users can update own comment reactions" on public.comment_reactions;
+drop policy if exists "Users can delete own comment reactions" on public.comment_reactions;
+drop policy if exists "Admins can create comment reactions" on public.comment_reactions;
+drop policy if exists "Admins can update comment reactions" on public.comment_reactions;
+drop policy if exists "Admins can delete comment reactions" on public.comment_reactions;
+create policy "Everyone can read comment reactions" on public.comment_reactions for select to anon, authenticated using (true);
+create policy "Users can create own comment reactions" on public.comment_reactions for insert to authenticated with check ((select auth.uid()) = user_id);
+create policy "Users can update own comment reactions" on public.comment_reactions for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
+create policy "Users can delete own comment reactions" on public.comment_reactions for delete to authenticated using ((select auth.uid()) = user_id);
+create policy "Admins can create comment reactions" on public.comment_reactions for insert to authenticated with check (public.is_admin());
+create policy "Admins can update comment reactions" on public.comment_reactions for update to authenticated using (public.is_admin()) with check (public.is_admin());
+create policy "Admins can delete comment reactions" on public.comment_reactions for delete to authenticated using (public.is_admin());
+
 grant usage on schema public to anon, authenticated;
-grant select on public.categories, public.events, public.comments to anon;
+grant select on public.categories, public.events, public.comments, public.comment_reactions to anon;
 grant select, insert, update, delete on all tables in schema public to authenticated;
 grant usage, select on all sequences in schema public to authenticated;
