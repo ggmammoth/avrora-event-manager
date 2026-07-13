@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Secure AvroraMU event administration dashboard.">
+  <title>Admin Dashboard | AvroraMU</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+  <header data-navbar></header>
+  <main>
+    <div class="container mt-3" data-config-alert></div>
+    <section class="page-header">
+      <div class="container">
+        <p class="eyebrow">Command center</p>
+        <h1>Admin Dashboard</h1>
+        <p class="text-secondary mb-0">Manage the realm from one secure workspace.</p>
+      </div>
+    </section>
+    <section class="section-padding">
+      <div class="container">
+        <div data-page-alert aria-live="polite"></div>
+        <div id="adminContent" class="d-none">
+          <ul class="nav nav-tabs flex-nowrap overflow-auto mb-4" id="adminTabs" role="tablist" aria-label="Administrator sections">
+            <li class="nav-item" role="presentation"><button class="nav-link active" id="dashboardTab" data-bs-toggle="tab" data-bs-target="#dashboardPane" type="button" role="tab">Dashboard</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="eventsTab" data-bs-toggle="tab" data-bs-target="#eventsPane" type="button" role="tab">Events</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="categoriesTab" data-bs-toggle="tab" data-bs-target="#categoriesPane" type="button" role="tab">Categories</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="registrationsTab" data-bs-toggle="tab" data-bs-target="#registrationsPane" type="button" role="tab">Registrations</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" id="usersTab" data-bs-toggle="tab" data-bs-target="#usersPane" type="button" role="tab">Users</button></li>
+          </ul>
+
+          <div class="tab-content">
+            <section class="tab-pane fade show active" id="dashboardPane" role="tabpanel" aria-labelledby="dashboardTab">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Realm overview</h2>
+                <button class="btn btn-sm btn-outline-gold" id="refreshDashboardButton" type="button"><i class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+              </div>
+              <div id="statsGrid" class="row g-3" aria-live="polite"></div>
+            </section>
+
+            <section class="tab-pane fade" id="eventsPane" role="tabpanel" aria-labelledby="eventsTab">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Events</h2>
+                <button class="btn btn-gold" id="newEventButton" type="button"><i class="bi bi-plus-lg me-1"></i>New event</button>
+              </div>
+              <div class="card table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead><tr><th>Event</th><th>Date</th><th>Category</th><th>Assets</th><th>State</th><th class="text-end">Actions</th></tr></thead>
+                  <tbody id="eventsTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="tab-pane fade" id="categoriesPane" role="tabpanel" aria-labelledby="categoriesTab">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h4 mb-0">Categories</h2>
+                <button class="btn btn-gold" id="newCategoryButton" type="button"><i class="bi bi-plus-lg me-1"></i>New category</button>
+              </div>
+              <div class="card table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead><tr><th>Name</th><th>Description</th><th class="text-end">Actions</th></tr></thead>
+                  <tbody id="categoriesTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="tab-pane fade" id="registrationsPane" role="tabpanel" aria-labelledby="registrationsTab">
+              <h2 class="h4 mb-3">All registrations</h2>
+              <div class="card table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead><tr><th>Player</th><th>Event</th><th>Character</th><th>Registered</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+                  <tbody id="registrationsTable"></tbody>
+                </table>
+              </div>
+            </section>
+
+            <section class="tab-pane fade" id="usersPane" role="tabpanel" aria-labelledby="usersTab">
+              <h2 class="h4 mb-3">Users</h2>
+              <div class="card table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                  <thead><tr><th>User</th><th>Joined</th><th>Role</th></tr></thead>
+                  <tbody id="usersTable"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div data-footer></div>
+
+  <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header border-secondary"><h2 class="modal-title h5" id="eventModalTitle">Event</h2><button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <form id="eventForm" novalidate>
+          <div class="modal-body">
+            <div id="eventFormAlert" aria-live="polite"></div>
+            <input type="hidden" name="id">
+            <div class="row g-3">
+              <div class="col-md-8"><label class="form-label" for="eventTitle">Title</label><input class="form-control" id="eventTitle" name="title" required minlength="2" maxlength="150"></div>
+              <div class="col-md-4"><label class="form-label" for="eventCategory">Category</label><select class="form-select" id="eventCategory" name="category_id" required></select></div>
+              <div class="col-12"><label class="form-label" for="shortDescription">Short description</label><input class="form-control" id="shortDescription" name="short_description" maxlength="240"></div>
+              <div class="col-12"><label class="form-label" for="eventDescription">Full description</label><textarea class="form-control" id="eventDescription" name="description" rows="5" required></textarea></div>
+              <div class="col-md-6"><label class="form-label" for="eventDate">Date and time</label><input class="form-control" id="eventDate" name="event_date" type="datetime-local" required></div>
+              <div class="col-md-6"><label class="form-label" for="eventLocation">Location</label><input class="form-control" id="eventLocation" name="location" maxlength="150"></div>
+              <div class="col-md-6"><label class="form-label" for="maxParticipants">Maximum participants</label><input class="form-control" id="maxParticipants" name="max_participants" type="number" min="1" step="1" required></div>
+              <div class="col-md-6 d-flex align-items-end"><div class="form-check mb-2"><input class="form-check-input" id="eventActive" name="is_active" type="checkbox" checked><label class="form-check-label" for="eventActive">Active and publicly visible</label></div></div>
+              <div class="col-md-6"><label class="form-label" for="eventImage">Event image</label><input class="form-control" id="eventImage" name="image" type="file" accept="image/jpeg,image/png,image/webp"><div class="form-text text-secondary">JPG, PNG, or WebP; maximum 5 MB.</div></div>
+              <div class="col-md-6"><label class="form-label" for="rulesFile">Rules PDF</label><input class="form-control" id="rulesFile" name="rules" type="file" accept="application/pdf"><div class="form-text text-secondary">PDF only; maximum 10 MB.</div></div>
+              <div class="col-12 d-none" id="existingAssets"><span class="small text-secondary me-2">Current files:</span><span id="existingAssetLinks"></span></div>
+            </div>
+          </div>
+          <div class="modal-footer border-secondary"><button class="btn btn-outline-light" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-gold" type="submit">Save event</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalTitle" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header border-secondary"><h2 class="modal-title h5" id="categoryModalTitle">Category</h2><button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button></div>
+        <form id="categoryForm" novalidate>
+          <div class="modal-body">
+            <div id="categoryFormAlert" aria-live="polite"></div><input type="hidden" name="id">
+            <div class="mb-3"><label class="form-label" for="categoryName">Name</label><input class="form-control" id="categoryName" name="name" required minlength="2" maxlength="80"></div>
+            <div><label class="form-label" for="categoryDescription">Description</label><textarea class="form-control" id="categoryDescription" name="description" rows="3"></textarea></div>
+          </div>
+          <div class="modal-footer border-secondary"><button class="btn btn-outline-light" type="button" data-bs-dismiss="modal">Cancel</button><button class="btn btn-gold" type="submit">Save category</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/pages/admin.js"></script>
+</body>
+</html>
