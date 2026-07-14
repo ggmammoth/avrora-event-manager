@@ -398,6 +398,7 @@ if (auth) {
     eventForm.reset();
     clearAlert(document.querySelector('#eventFormAlert'));
     eventForm.elements.id.value = item?.id || '';
+    eventForm.elements.event_date.min = item ? '' : formatDateInput(new Date());
     document.querySelector('#eventModalTitle').textContent = item ? 'Edit event' : 'Create event';
     populateCategoryOptions(item?.category_id ? String(item.category_id) : '');
     if (item) {
