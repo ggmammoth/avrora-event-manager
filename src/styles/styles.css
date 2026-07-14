@@ -64,5 +64,10 @@ a { color: var(--gold-light); }
 .alert-warning { background: #342811; color: #f6dfa1; border-color: #725a24; }
 .alert-danger { background: #361519; color: #ffc4ca; border-color: #7e3038; }
 .alert-success { background: #123422; color: #b9f3d2; border-color: #286d49; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+  .event-card:hover, .btn-gold:hover { transform: none; }
+}
 @media (max-width: 991.98px) { .navbar-collapse { padding: 1rem 0; } .hero { min-height: 64vh; } }
 @media (max-width: 575.98px) { .section-padding { padding: 3.5rem 0; } .page-header { padding-top: 3rem; } .table-responsive { font-size: .875rem; } }
