@@ -470,7 +470,11 @@ if (auth) {
       else await createEvent({ ...values, created_by: auth.session.user.id });
       eventModal.hide();
       await Promise.all([loadEvents(), loadStats()]);
-      showSuccess(`Event ${id ? 'updated' : 'created'} successfully.`);
+      const action = id ? 'updated' : 'created';
+      const visibility = values.is_active
+        ? 'It is publicly visible on the Events page.'
+        : 'It is inactive and will not appear on the Events page.';
+      showSuccess(`Event ${action} successfully. ${visibility}`);
     } catch (error) {
       showAlert(alertBox, friendlyError(error, 'Event'));
     } finally {
