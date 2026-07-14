@@ -19,6 +19,17 @@ let eventData; let session; let profile;
 
 function registrationCount(event) { return Number(event.registration_count ?? event.registrations?.[0]?.count ?? 0); }
 
+function createLoginPrompt(message) {
+  const paragraph = document.createElement('p');
+  paragraph.className = 'text-secondary';
+  const link = document.createElement('a');
+  const next = `${location.pathname}${location.search}`;
+  link.href = `/login.html?next=${encodeURIComponent(next)}`;
+  link.textContent = 'login';
+  paragraph.append('Please ', link, ` ${message}`);
+  return paragraph;
+}
+
 function renderDetails(event) {
   details.replaceChildren(); document.title = `${event.title} | AvroraMU`;
   const row = document.createElement('div'); row.className = 'row g-5 align-items-start';
@@ -39,7 +50,7 @@ function renderDetails(event) {
 async function loadRegistration() {
   const form = document.querySelector('#registrationForm'); const status = document.querySelector('#registrationStatus');
   CHARACTER_CLASSES.forEach((name) => form.characterClass.add(new Option(name, name)));
-  if (!session) { form.classList.add('d-none'); status.innerHTML = '<p class="text-secondary">Please <a href="/login.html">login</a> to register.</p>'; return; }
+  if (!session) { form.classList.add('d-none'); status.replaceChildren(createLoginPrompt('to register.')); return; }
   const existing = await getRegistrationForEvent(id, session.user.id);
   if (existing) { form.classList.add('d-none'); const badge = document.createElement('span'); badge.className = statusBadge(existing.status); badge.textContent = existing.status; const text = document.createElement('p'); text.append('You registered ', badge, ` as ${existing.character_name} (${existing.character_class}).`); status.append(text); return; }
   const count = registrationCount(eventData); const expired = new Date(eventData.event_date) <= new Date(); const full = eventData.max_participants && count >= eventData.max_participants;
@@ -116,7 +127,7 @@ async function loadComments() {
 
 function setupCommentForm() {
   const form = document.querySelector('#commentForm');
-  if (!session) { form.innerHTML = '<p class="text-secondary">Please <a href="/login.html">login</a> to add a comment.</p>'; return; }
+  if (!session) { form.replaceChildren(createLoginPrompt('to add a comment.')); return; }
   form.addEventListener('submit', async (event) => {
     event.preventDefault(); const alertBox = document.querySelector('#commentAlert'); clearAlert(alertBox); const content = form.content.value.trim(); if (!content) return showAlert(alertBox, 'Comment cannot be empty.');
     const button = form.querySelector('button[type="submit"]'); setButtonLoading(button, true, 'Posting…');
