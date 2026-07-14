@@ -10,14 +10,23 @@ import { DEFAULT_AVATAR } from '../utils/constants.js';
 await initPage();
 const session = await requireAuth();
 if (session) {
-  const content = document.querySelector('#profileContent'); const form = document.querySelector('#profileForm'); const alertBox = document.querySelector('[data-page-alert]'); let profile;
+  const content = document.querySelector('#profileContent'); const form = document.querySelector('#profileForm'); const alertBox = document.querySelector('[data-page-alert]'); const avatarPreview = document.querySelector('#avatarPreview'); let profile; let previewUrl;
   try {
     profile = await getProfile(session.user.id);
-    document.querySelector('#avatarPreview').src = profile.avatar_url || DEFAULT_AVATAR;
+    avatarPreview.src = profile.avatar_url || DEFAULT_AVATAR;
     document.querySelector('#profileName').textContent = profile.full_name || 'Adventurer';
     document.querySelector('#profileRole').textContent = profile.role;
     form.fullName.value = profile.full_name || ''; document.querySelector('#email').value = session.user.email; content.classList.remove('d-none');
   } catch (error) { showAlert(alertBox, error.message); }
+  form.avatar.addEventListener('change', () => {
+    clearAlert(alertBox);
+    const file = form.avatar.files[0];
+    const fileError = validateImage(file);
+    if (fileError) { form.avatar.value = ''; showAlert(alertBox, fileError); return; }
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = file ? URL.createObjectURL(file) : '';
+    avatarPreview.src = previewUrl || profile.avatar_url || DEFAULT_AVATAR;
+  });
   form.addEventListener('submit', async (event) => {
     event.preventDefault(); clearAlert(alertBox); const name = form.fullName.value.trim(); const file = form.avatar.files[0];
     if (name.length < 2) return showAlert(alertBox, 'Full name must contain at least 2 characters.');
@@ -26,7 +35,9 @@ if (session) {
     try {
       let avatarUrl = profile.avatar_url; if (file) avatarUrl = await uploadAvatar(session.user.id, file);
       profile = await updateProfile(session.user.id, { full_name: name, avatar_url: avatarUrl });
-      document.querySelector('#avatarPreview').src = avatarUrl || DEFAULT_AVATAR; document.querySelector('#profileName').textContent = name; form.avatar.value = '';
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = '';
+      avatarPreview.src = avatarUrl || DEFAULT_AVATAR; document.querySelector('#profileName').textContent = name; form.avatar.value = '';
       showAlert(alertBox, 'Profile updated successfully.', 'success');
     } catch (error) { showAlert(alertBox, error.message); } finally { setButtonLoading(button, false); }
   });
