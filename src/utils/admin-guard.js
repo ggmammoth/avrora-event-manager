@@ -23,7 +23,7 @@ export async function requireAdmin() {
     const session = await getSession();
     if (!session) {
       showAlert(alertBox, 'Please log in with an administrator account to continue.', 'warning');
-      const next = encodeURIComponent(location.pathname + location.search);
+      const next = encodeURIComponent(location.pathname + location.search + location.hash);
       redirectAfterMessage(`/login.html?next=${next}`);
       return null;
     }
