@@ -9,7 +9,7 @@ export function createEventCard(event) {
   const body = document.createElement('div'); body.className = 'card-body d-flex flex-column';
   const category = document.createElement('span'); category.className = 'badge category-badge align-self-start mb-3'; category.textContent = event.categories?.name || 'Uncategorized';
   const title = document.createElement('h3'); title.className = 'h5 card-title'; title.textContent = event.title;
-  const date = document.createElement('p'); date.className = 'small text-gold mb-2'; date.innerHTML = `<i class="bi bi-calendar-event me-2"></i>${formatDate(event.event_date)}`;
+  const date = document.createElement('p'); date.className = 'small text-gold mb-2'; date.innerHTML = `<i class="bi bi-calendar-event me-2" aria-hidden="true"></i>${formatDate(event.event_date)}`;
   const description = document.createElement('p'); description.className = 'card-text text-secondary flex-grow-1'; description.textContent = truncate(event.short_description || event.description);
   const link = document.createElement('a'); link.className = 'btn btn-outline-gold stretched-link'; link.href = `/event-details.html?id=${encodeURIComponent(event.id)}`; link.textContent = 'View details';
   body.append(category, title, date, description, link); article.append(image, body); column.append(article); return column;
