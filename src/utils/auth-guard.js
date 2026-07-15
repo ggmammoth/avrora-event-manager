@@ -5,7 +5,7 @@ export async function requireAuth() {
   try {
     const session = await getSession();
     if (!session) {
-      const next = encodeURIComponent(location.pathname + location.search);
+      const next = encodeURIComponent(location.pathname + location.search + location.hash);
       location.replace(`/login.html?next=${next}`);
       return null;
     }
